@@ -10,6 +10,7 @@ import {
   Alert,
   TextInput,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,8 @@ export const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const isDarkMode = colors.background === '#0F172A';
 
   const handleLogin = async () => {
     if (!phone.trim()) {
@@ -46,7 +49,7 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={isDark(colors.background) ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -57,10 +60,11 @@ export const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.headerSection}>
-            <View style={[styles.logoCircle, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="briefcase" size={36} color={colors.primary} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>BHC Jobs</Text>
+            <Image 
+              source={require('../../assets/images/logo.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome back!</Text>
           </View>
 
@@ -148,12 +152,9 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xxxl + Spacing.xl,
     marginBottom: Spacing.xl,
   },
-  logoCircle: {
-    width: 80,
+  logoImage: {
     height: 80,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 200,
     marginBottom: Spacing.md,
   },
   title: {

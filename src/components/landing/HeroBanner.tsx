@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../theme/ThemeContext';
 
-interface HeroBannerProps extends TouchableOpacityProps {
+interface HeroBannerProps {
   onExploreJobs?: () => void;
   onLogin?: () => void;
   isDark?: boolean;
@@ -15,20 +16,23 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onLogin, 
   isDark = false,
   onThemeToggle,
-  ...props 
 }) => {
+  const { colors } = useTheme();
+
   return (
     <LinearGradient
-      colors={['#2563EB', '#1D4ED8']}
+      colors={[colors.primary, colors.primaryDark]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
-      {...props}
     >
       <View style={styles.topRow}>
         <View style={styles.logoContainer}>
-          <Ionicons name="briefcase" size={24} color="#FFFFFF" />
-          <Text style={styles.logoText}>BHC Jobs</Text>
+          <Image 
+            source={require('../../../assets/images/logo.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
         {onThemeToggle && (
           <TouchableOpacity 
@@ -84,12 +88,10 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  logoText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  logoImage: {
+    height: 40,
+    width: 120,
   },
   themeToggle: {
     flexDirection: 'row',

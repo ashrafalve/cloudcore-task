@@ -10,6 +10,7 @@ import {
   Alert,
   TextInput,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -118,10 +119,11 @@ export const RegisterScreen: React.FC = () => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View style={styles.headerSection}>
-            <View style={[styles.logoCircle, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="person-add" size={36} color={colors.primary} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+            <Image 
+              source={require('../../assets/images/logo.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Join BHC Jobs today</Text>
           </View>
 
@@ -272,18 +274,10 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
     marginBottom: Spacing.lg,
   },
-  logoCircle: {
-    width: 80,
+  logoImage: {
     height: 80,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 200,
     marginBottom: Spacing.md,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    marginBottom: Spacing.xs,
   },
   subtitle: {
     ...Typography.body,
