@@ -1,8 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing } from '../../constants/spacing';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface AppButtonProps {
   title: string;
@@ -21,23 +21,29 @@ export const AppButton: React.FC<AppButtonProps> = ({
   loading = false,
   style,
 }) => {
+  const { colors } = useTheme();
+
   const getButtonStyle = (): ViewStyle => {
     switch (variant) {
       case 'secondary':
-        return styles.secondaryButton;
+        return { backgroundColor: colors.secondary };
       case 'outline':
-        return styles.outlineButton;
+        return { 
+          backgroundColor: colors.transparent, 
+          borderWidth: 2, 
+          borderColor: colors.primary 
+        };
       default:
-        return styles.primaryButton;
+        return { backgroundColor: colors.primary };
     }
   };
 
   const getTextStyle = (): TextStyle => {
     switch (variant) {
       case 'outline':
-        return styles.outlineText;
+        return { color: colors.primary };
       default:
-        return styles.buttonText;
+        return { color: colors.white };
     }
   };
 
@@ -46,7 +52,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
       style={[
         styles.button,
         getButtonStyle(),
-        disabled && styles.disabledButton,
+        disabled && { backgroundColor: colors.textMuted, borderColor: colors.textMuted },
         style,
       ]}
       onPress={onPress}
@@ -54,9 +60,9 @@ export const AppButton: React.FC<AppButtonProps> = ({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? Colors.primary : Colors.white} />
+        <ActivityIndicator color={variant === 'outline' ? colors.primary : colors.white} />
       ) : (
-        <Text style={[getTextStyle(), disabled && styles.disabledText]}>
+        <Text style={[getTextStyle(), disabled && { color: colors.white }]}>
           {title}
         </Text>
       )}
@@ -72,31 +78,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 56,
-  },
-  primaryButton: {
-    backgroundColor: Colors.primary,
-  },
-  secondaryButton: {
-    backgroundColor: Colors.secondary,
-  },
-  outlineButton: {
-    backgroundColor: Colors.transparent,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  disabledButton: {
-    backgroundColor: Colors.textMuted,
-    borderColor: Colors.textMuted,
-  },
-  buttonText: {
-    ...Typography.button,
-    color: Colors.white,
-  },
-  outlineText: {
-    ...Typography.button,
-    color: Colors.primary,
-  },
-  disabledText: {
-    color: Colors.white,
   },
 });

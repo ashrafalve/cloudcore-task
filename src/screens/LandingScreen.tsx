@@ -9,12 +9,13 @@ import { IndustryCard } from '../components/landing/IndustryCard';
 import { JobCard } from '../components/landing/JobCard';
 import { CompanyCard } from '../components/landing/CompanyCard';
 import { useLandingData } from '../hooks/useLandingData';
-import { Colors } from '../constants/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { Spacing } from '../constants/spacing';
 import { Industry, Job, Company } from '../types/api';
 
 export const LandingScreen: React.FC = () => {
   const router = useRouter();
+  const { colors, isDark, toggleTheme } = useTheme();
   const { industries, jobs, companies, isLoading, error, refresh } = useLandingData();
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export const LandingScreen: React.FC = () => {
         <SectionHeader title="Recommended Jobs" />
         <View style={styles.jobsContainer}>
           {jobs.slice(0, 5).map((job, index) => (
-            <View key={String(job.id)} style={index === 0 ? styles.jobCardFirst : undefined}>
+            <View key={String(job.id)}>
               <JobCard job={job} onPress={() => handleJobPress(job)} />
             </View>
           ))}
@@ -110,22 +111,27 @@ export const LandingScreen: React.FC = () => {
 
   if (isLoading && industries.length === 0 && jobs.length === 0 && companies.length === 0) {
     return (
-      <ScreenContainer padded={false}>
-        <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <ScreenContainer padded={false} style={{ backgroundColor: colors.background }}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
         <LoadingState fullScreen message="Loading jobs..." />
       </ScreenContainer>
     );
   }
 
   return (
-    <ScreenContainer padded={false}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+    <ScreenContainer padded={false} style={{ backgroundColor: colors.background }}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       <FlatList
         data={[]}
         renderItem={null}
         ListHeaderComponent={
           <>
-            <HeroBanner onExploreJobs={handleExploreJobs} onLogin={handleLogin} />
+            <HeroBanner 
+              onExploreJobs={handleExploreJobs} 
+              onLogin={handleLogin}
+              isDark={isDark}
+              onThemeToggle={toggleTheme}
+            />
             {error && (
               <View style={styles.errorContainer}>
                 <ErrorState message={error} onRetry={refresh} />
@@ -135,7 +141,7 @@ export const LandingScreen: React.FC = () => {
             {renderJobsSection()}
             {renderCompaniesSection()}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>© 2026 BHC Jobs</Text>
+              <Text style={[styles.footerText, { color: colors.textMuted }]}>© 2026 BHC Jobs</Text>
             </View>
           </>
         }
@@ -143,8 +149,8 @@ export const LandingScreen: React.FC = () => {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={refresh}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
         contentContainerStyle={styles.listContent}
@@ -167,9 +173,6 @@ const styles = StyleSheet.create({
   jobsContainer: {
     paddingHorizontal: Spacing.lg,
   },
-  jobCardFirst: {
-    paddingHorizontal: 0,
-  },
   errorContainer: {
     margin: Spacing.lg,
   },
@@ -179,6 +182,5 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: Colors.textMuted,
   },
 });

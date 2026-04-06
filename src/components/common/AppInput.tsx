@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, TextInput, Text, StyleSheet, TextInputProps } from 'react-native';
-import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing } from '../../constants/spacing';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface AppInputProps extends TextInputProps {
   label?: string;
@@ -19,24 +19,27 @@ export const AppInput: React.FC<AppInputProps> = ({
   style,
   ...props
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.inputContainer, error && styles.inputError]}>
+      {label && <Text style={[styles.label, { color: colors.text }]}>{label}</Text>}
+      <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: error ? colors.error : colors.border }]}>
         {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
         <TextInput
           style={[
             styles.input,
+            { color: colors.text },
             leftIcon ? styles.inputWithLeftIcon : null,
             rightIcon ? styles.inputWithRightIcon : null,
             style,
           ].filter(Boolean)}
-          placeholderTextColor={Colors.textMuted}
+          placeholderTextColor={colors.textMuted}
           {...props}
         />
         {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
       </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
     </View>
   );
 };
@@ -47,26 +50,19 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.bodySmall,
-    color: Colors.text,
     marginBottom: Spacing.sm,
     fontWeight: '600',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderRadius: 12,
     minHeight: 56,
-  },
-  inputError: {
-    borderColor: Colors.error,
   },
   input: {
     flex: 1,
     ...Typography.body,
-    color: Colors.text,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
   },
@@ -84,7 +80,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...Typography.caption,
-    color: Colors.error,
     marginTop: Spacing.xs,
   },
 });

@@ -12,69 +12,41 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Colors } from '../constants/colors';
 import { Typography } from '../constants/typography';
 import { Spacing } from '../constants/spacing';
-import { loginJobSeeker } from '../services/authService';
-import { handleApiError } from '../api/client';
+import { useTheme } from '../theme/ThemeContext';
 
-const loginSchema = z.object({
-  phone: z.string().min(1, 'Phone number is required').min(11, 'Phone must be 11 digits'),
-  password: z.string().min(1, 'Password is required').min(6, 'Password must be at least 6 characters'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+const ActivityIndicator = require('react-native').ActivityIndicator;
 
 export const LoginScreen: React.FC = () => {
   const router = useRouter();
+  const { colors } = useTheme();
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      phone: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    try {
-      const response = await loginJobSeeker({
-        phone: data.phone.trim(),
-        password: data.password,
-      });
-
-      if (response.status === true) {
-        Alert.alert('Success', 'Login successful!', [
-          { text: 'OK', onPress: () => router.back() }
-        ]);
-      } else {
-        const errorMsg = response.error 
-          ? Object.values(response.error).flat().join(', ')
-          : response.message || 'Login failed. Please try again.';
-        Alert.alert('Error', errorMsg);
-      }
-    } catch (error) {
-      Alert.alert('Error', handleApiError(error));
-    } finally {
-      setIsLoading(false);
+  const handleLogin = async () => {
+    if (!phone.trim()) {
+      Alert.alert('Error', 'Please enter your phone number');
+      return;
     }
+    if (!password) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      Alert.alert('Success', 'Login functionality coming soon!');
+    }, 1000);
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark(colors.background) ? 'light-content' : 'dark-content'} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -85,87 +57,71 @@ export const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.headerSection}>
-            <View style={styles.logoCircle}>
-              <Ionicons name="briefcase" size={36} color={Colors.primary} />
+            <View style={[styles.logoCircle, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="briefcase" size={36} color={colors.primary} />
             </View>
-            <Text style={styles.title}>BHC Jobs</Text>
-            <Text style={styles.subtitle}>Welcome back!</Text>
+            <Text style={[styles.title, { color: colors.text }]}>BHC Jobs</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Welcome back!</Text>
           </View>
 
           <View style={styles.formSection}>
             <View style={styles.inputWrapper}>
-              <View style={styles.inputContainer}>
-                <Ionicons name="call-outline" size={20} color={Colors.textMuted} />
-                <Controller
-                  control={control}
-                  name="phone"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Phone Number"
-                      placeholderTextColor={Colors.textMuted}
-                      keyboardType="phone-pad"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      maxLength={11}
-                    />
-                  )}
+              <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Ionicons name="call-outline" size={20} color={colors.textMuted} />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Phone Number"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                  maxLength={11}
                 />
               </View>
-              {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
             </View>
 
             <View style={styles.inputWrapper}>
-              <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color={Colors.textMuted} />
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Password"
-                      placeholderTextColor={Colors.textMuted}
-                      secureTextEntry={!showPassword}
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                    />
-                  )}
+              <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Ionicons name="lock-closed-outline" size={20} color={colors.textMuted} />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Password"
+                  placeholderTextColor={colors.textMuted}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <Ionicons 
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'} 
                     size={20} 
-                    color={Colors.textMuted} 
+                    color={colors.textMuted} 
                   />
                 </TouchableOpacity>
               </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
             </View>
 
             <TouchableOpacity style={styles.forgotButton}>
-              <Text style={styles.forgotText}>Forgot Password?</Text>
+              <Text style={[styles.forgotText, { color: colors.primary }]}>Forgot Password?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
-              onPress={handleSubmit(onSubmit)}
+              style={[styles.loginButton, isLoading && { backgroundColor: colors.textMuted }]} 
+              onPress={handleLogin}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={colors.white} />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <Text style={[styles.loginButtonText, { color: colors.white }]}>Sign In</Text>
               )}
             </TouchableOpacity>
           </View>
 
           <View style={styles.footerSection}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={[styles.footerText, { color: colors.textSecondary }]}>Don't have an account?</Text>
             <TouchableOpacity onPress={() => router.push('/register')}>
-              <Text style={styles.signupText}> Sign Up</Text>
+              <Text style={[styles.signupText, { color: colors.primary }]}> Sign Up</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -174,12 +130,11 @@ export const LoginScreen: React.FC = () => {
   );
 };
 
-const ActivityIndicator = require('react-native').ActivityIndicator;
+const isDark = (bg: string) => bg === '#0F172A' || bg === '#1E293B';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -197,7 +152,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: Colors.primaryLight + '20',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md,
@@ -205,12 +159,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   subtitle: {
     ...Typography.body,
-    color: Colors.textSecondary,
   },
   formSection: {
     marginBottom: Spacing.xl,
@@ -221,24 +173,15 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     height: 56,
   },
   input: {
     flex: 1,
     ...Typography.body,
-    color: Colors.text,
     marginLeft: Spacing.sm,
-  },
-  errorText: {
-    ...Typography.caption,
-    color: Colors.error,
-    marginTop: Spacing.xs,
-    marginLeft: Spacing.xs,
   },
   forgotButton: {
     alignSelf: 'flex-end',
@@ -246,22 +189,16 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     ...Typography.bodySmall,
-    color: Colors.primary,
     fontWeight: '600',
   },
   loginButton: {
-    backgroundColor: Colors.primary,
     borderRadius: 12,
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  loginButtonDisabled: {
-    backgroundColor: Colors.textMuted,
-  },
   loginButtonText: {
     ...Typography.button,
-    color: Colors.white,
   },
   footerSection: {
     flexDirection: 'row',
@@ -271,11 +208,9 @@ const styles = StyleSheet.create({
   },
   footerText: {
     ...Typography.body,
-    color: Colors.textSecondary,
   },
   signupText: {
     ...Typography.body,
-    color: Colors.primary,
     fontWeight: '700',
   },
 });

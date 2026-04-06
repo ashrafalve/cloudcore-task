@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Colors } from '../../constants/colors';
-import { Spacing } from '../../constants/spacing';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface ScreenContainerProps {
   children: React.ReactNode;
@@ -14,8 +13,10 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   style,
   padded = true,
 }) => {
+  const { colors } = useTheme();
+  
   return (
-    <View style={[styles.container, padded && styles.padded, style]}>
+    <View style={[styles.container, padded && styles.padded, { backgroundColor: colors.background }, style]}>
       {children}
     </View>
   );
@@ -24,9 +25,8 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   padded: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: 16,
   },
 });

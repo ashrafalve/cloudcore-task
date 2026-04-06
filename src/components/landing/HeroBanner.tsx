@@ -1,26 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TouchableOpacityProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
-import { Typography } from '../../constants/typography';
-import { Spacing } from '../../constants/spacing';
 
-interface HeroBannerProps {
+interface HeroBannerProps extends TouchableOpacityProps {
   onExploreJobs?: () => void;
   onLogin?: () => void;
+  isDark?: boolean;
+  onThemeToggle?: () => void;
 }
 
-export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreJobs, onLogin }) => {
+export const HeroBanner: React.FC<HeroBannerProps> = ({ 
+  onExploreJobs, 
+  onLogin, 
+  isDark = false,
+  onThemeToggle,
+  ...props 
+}) => {
   return (
     <LinearGradient
-      colors={[Colors.primary, Colors.primaryDark]}
+      colors={['#2563EB', '#1D4ED8']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
+      {...props}
     >
-      <View style={styles.iconContainer}>
-        <Ionicons name="briefcase" size={48} color={Colors.white} />
+      <View style={styles.topRow}>
+        <View style={styles.logoContainer}>
+          <Ionicons name="briefcase" size={24} color="#FFFFFF" />
+          <Text style={styles.logoText}>BHC Jobs</Text>
+        </View>
+        {onThemeToggle && (
+          <TouchableOpacity 
+            style={styles.themeToggle} 
+            onPress={onThemeToggle}
+            activeOpacity={0.7}
+          >
+            <Ionicons 
+              name={isDark ? 'sunny' : 'moon'} 
+              size={18} 
+              color="#FFFFFF" 
+            />
+            <Text style={styles.themeText}>
+              {isDark ? 'Light' : 'Dark'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>#1 Platform for Saudi Jobs</Text>
@@ -29,11 +54,11 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreJobs, onLogin }
         </Text>
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.primaryButton} onPress={onExploreJobs} activeOpacity={0.8}>
-            <Ionicons name="search" size={18} color={Colors.primary} />
+            <Ionicons name="search" size={18} color="#2563EB" />
             <Text style={styles.primaryButtonText}>Explore Jobs</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.secondaryButton} onPress={onLogin} activeOpacity={0.8}>
-            <Ionicons name="log-in" size={18} color={Colors.white} />
+            <Ionicons name="log-in" size={18} color="#FFFFFF" />
             <Text style={styles.secondaryButtonText}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -44,70 +69,105 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreJobs, onLogin }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xxxl,
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 48,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
   },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  themeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    gap: 6,
+  },
+  themeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: 16,
   },
   content: {
     alignItems: 'center',
   },
   title: {
-    ...Typography.h1,
-    color: Colors.white,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
   },
   subtitle: {
-    ...Typography.body,
-    color: Colors.white,
+    fontSize: 15,
+    color: '#FFFFFF',
     textAlign: 'center',
     opacity: 0.9,
-    marginBottom: Spacing.xl,
-    paddingHorizontal: Spacing.md,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    lineHeight: 22,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: 16,
     width: '100%',
     justifyContent: 'center',
   },
   primaryButton: {
-    backgroundColor: Colors.white,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.sm,
+    gap: 8,
     flex: 1,
     maxWidth: 170,
   },
   primaryButtonText: {
-    ...Typography.button,
-    color: Colors.primary,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2563EB',
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: Colors.white,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+    borderColor: '#FFFFFF',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.sm,
+    gap: 8,
     flex: 1,
     maxWidth: 170,
   },
   secondaryButtonText: {
-    ...Typography.button,
-    color: Colors.white,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

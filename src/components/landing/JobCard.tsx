@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Spacing } from '../../constants/spacing';
+import { useTheme } from '../../theme/ThemeContext';
 import { Job } from '../../types/api';
 
 interface JobCardProps {
@@ -12,6 +12,7 @@ interface JobCardProps {
 }
 
 export const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
+  const { colors } = useTheme();
   const [logoError, setLogoError] = useState(false);
 
   const salaryText = job.min_salary && job.max_salary 
@@ -25,9 +26,13 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
   const expiryDate = job.expiry ? new Date(job.expiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : null;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity 
+      style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+      onPress={onPress} 
+      activeOpacity={0.7}
+    >
       <View style={styles.header}>
-        <View style={styles.companyLogo}>
+        <View style={[styles.companyLogo, { backgroundColor: colors.primary }]}>
           {job.company?.image ? (
             <Image 
               source={{ uri: `https://dev.bhcjobs.com/storage/company-image/${job.company.image}` }} 
@@ -35,18 +40,18 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
               onError={() => setLogoError(true)}
             />
           ) : (
-            <Text style={styles.companyLogoText}>
+            <Text style={[styles.companyLogoText, { color: colors.white }]}>
               {job.company_name?.charAt(0).toUpperCase() || 'C'}
             </Text>
           )}
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
             {job.job_title || 'Job Title'}
           </Text>
           <View style={styles.companyRow}>
-            <Ionicons name="business-outline" size={14} color={Colors.textSecondary} />
-            <Text style={styles.company} numberOfLines={1}>
+            <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
+            <Text style={[styles.company, { color: colors.textSecondary }]} numberOfLines={1}>
               {job.company_name || 'Company Name'}
             </Text>
           </View>
@@ -55,43 +60,43 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
 
       {salaryText && (
         <View style={styles.salaryContainer}>
-          <View style={styles.salaryBadge}>
-            <Ionicons name="cash-outline" size={14} color={Colors.primary} />
-            <Text style={styles.salaryText}>{salaryText}</Text>
+          <View style={[styles.salaryBadge, { backgroundColor: colors.primaryLight + '20' }]}>
+            <Ionicons name="cash-outline" size={14} color={colors.primary} />
+            <Text style={[styles.salaryText, { color: colors.primary }]}>{salaryText}</Text>
           </View>
         </View>
       )}
       
       <View style={styles.details}>
         <View style={styles.detailItem}>
-          <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
-          <Text style={styles.detailText}>{countryName}</Text>
+          <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+          <Text style={[styles.detailText, { color: colors.textSecondary }]}>{countryName}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="briefcase-outline" size={14} color={Colors.textSecondary} />
-          <Text style={styles.detailText}>{jobType === 'overseas' ? 'OVERSEAS' : jobType}</Text>
+          <Ionicons name="briefcase-outline" size={14} color={colors.textSecondary} />
+          <Text style={[styles.detailText, { color: colors.textSecondary }]}>{jobType === 'overseas' ? 'OVERSEAS' : jobType}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="people-outline" size={14} color={Colors.textSecondary} />
-          <Text style={styles.detailText}>{job.vacancy} vacancy</Text>
+          <Ionicons name="people-outline" size={14} color={colors.textSecondary} />
+          <Text style={[styles.detailText, { color: colors.textSecondary }]}>{job.vacancy} vacancy</Text>
         </View>
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.borderLight }]}>
         {expiryDate ? (
           <View style={styles.expiryContainer}>
-            <Ionicons name="time-outline" size={12} color={Colors.warning} />
-            <Text style={styles.expiryText}>Deadline: {expiryDate}</Text>
+            <Ionicons name="time-outline" size={12} color={colors.warning} />
+            <Text style={[styles.expiryText, { color: colors.warning }]}>Deadline: {expiryDate}</Text>
           </View>
         ) : (
           <View />
         )}
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.viewButton}>
-            <Text style={styles.viewButtonText}>View</Text>
+          <TouchableOpacity style={[styles.viewButton, { borderColor: colors.primary }]}>
+            <Text style={[styles.viewButtonText, { color: colors.primary }]}>View</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.applyButton}>
-            <Text style={styles.applyButtonText}>Apply</Text>
+          <TouchableOpacity style={[styles.applyButton, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.applyButtonText, { color: colors.white }]}>Apply</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -101,13 +106,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: Colors.black,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -121,7 +124,6 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -133,7 +135,6 @@ const styles = StyleSheet.create({
   },
   companyLogoText: {
     ...Typography.h3,
-    color: Colors.white,
   },
   headerInfo: {
     flex: 1,
@@ -141,7 +142,6 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.h4,
-    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   companyRow: {
@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
   },
   company: {
     ...Typography.bodySmall,
-    color: Colors.textSecondary,
     marginLeft: Spacing.xs,
   },
   salaryContainer: {
@@ -159,7 +158,6 @@ const styles = StyleSheet.create({
   salaryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight + '15',
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
     borderRadius: 8,
@@ -167,7 +165,6 @@ const styles = StyleSheet.create({
   },
   salaryText: {
     ...Typography.bodySmall,
-    color: Colors.primary,
     fontWeight: '700',
     marginLeft: Spacing.xs,
   },
@@ -183,7 +180,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     ...Typography.caption,
-    color: Colors.textSecondary,
     marginLeft: Spacing.xs,
   },
   footer: {
@@ -191,7 +187,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
     paddingTop: Spacing.md,
   },
   expiryContainer: {
@@ -200,9 +195,8 @@ const styles = StyleSheet.create({
   },
   expiryText: {
     ...Typography.caption,
-    color: Colors.warning,
-    marginLeft: Spacing.xs,
     fontWeight: '500',
+    marginLeft: Spacing.xs,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -213,20 +207,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.primary,
   },
   viewButtonText: {
     ...Typography.buttonSmall,
-    color: Colors.primary,
   },
   applyButton: {
-    backgroundColor: Colors.primary,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: 8,
   },
   applyButtonText: {
     ...Typography.buttonSmall,
-    color: Colors.white,
   },
 });

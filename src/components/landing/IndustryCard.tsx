@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Colors } from '../../constants/colors';
-import { Typography } from '../../constants/typography';
-import { Spacing } from '../../constants/spacing';
+import { Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useTheme } from '../../theme/ThemeContext';
 import { Industry } from '../../types/api';
 
 interface IndustryCardProps {
@@ -13,13 +11,18 @@ interface IndustryCardProps {
 const IMAGE_BASE_URL = 'https://dev.bhcjobs.com/storage/industry-image';
 
 export const IndustryCard: React.FC<IndustryCardProps> = ({ industry, onPress }) => {
+  const { colors } = useTheme();
   const [imageError, setImageError] = useState(false);
   
   const imageUrl = industry.image ? `${IMAGE_BASE_URL}/${industry.image}` : null;
   const showImage = imageUrl && !imageError;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity 
+      style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+      onPress={onPress} 
+      activeOpacity={0.7}
+    >
       {showImage ? (
         <Image 
           source={{ uri: imageUrl }} 
@@ -27,15 +30,15 @@ export const IndustryCard: React.FC<IndustryCardProps> = ({ industry, onPress })
           onError={() => setImageError(true)}
         />
       ) : (
-        <Text style={styles.iconText}>
+        <Text style={[styles.iconText, { color: colors.primary }]}>
           {industry.name.charAt(0).toUpperCase()}
         </Text>
       )}
-      <Text style={styles.name} numberOfLines={2}>
+      <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
         {industry.name}
       </Text>
       {industry.jobs_count !== undefined && industry.jobs_count > 0 && (
-        <Text style={styles.jobCount}>
+        <Text style={[styles.jobCount, { color: colors.textMuted }]}>
           {industry.jobs_count} jobs
         </Text>
       )}
@@ -45,15 +48,13 @@ export const IndustryCard: React.FC<IndustryCardProps> = ({ industry, onPress })
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.surface,
     borderRadius: 16,
-    padding: Spacing.lg,
+    padding: 16,
     alignItems: 'center',
     width: 110,
-    marginRight: Spacing.md,
+    marginRight: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: Colors.black,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -63,23 +64,20 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 8,
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
   },
   iconText: {
     fontSize: 24,
     fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
   },
   name: {
-    ...Typography.bodySmall,
-    color: Colors.text,
+    fontSize: 13,
     textAlign: 'center',
     fontWeight: '600',
-    marginBottom: Spacing.xs,
+    marginBottom: 4,
   },
   jobCount: {
-    ...Typography.caption,
-    color: Colors.textMuted,
+    fontSize: 11,
   },
 });

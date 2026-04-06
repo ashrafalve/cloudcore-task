@@ -1,9 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
-import { Typography } from '../../constants/typography';
-import { Spacing } from '../../constants/spacing';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface SectionHeaderProps {
   title: string;
@@ -11,13 +9,15 @@ interface SectionHeaderProps {
 }
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onSeeAll }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       {onSeeAll && (
         <TouchableOpacity style={styles.seeAllButton} onPress={onSeeAll}>
-          <Text style={styles.seeAll}>View All</Text>
-          <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+          <Text style={[styles.seeAll, { color: colors.primary }]}>View All</Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.primary} />
         </TouchableOpacity>
       )}
     </View>
@@ -29,20 +29,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   title: {
-    ...Typography.h4,
-    color: Colors.text,
+    fontSize: 18,
+    fontWeight: '600',
   },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   seeAll: {
-    ...Typography.bodySmall,
-    color: Colors.primary,
+    fontSize: 14,
     fontWeight: '600',
+    marginRight: 4,
   },
 });
