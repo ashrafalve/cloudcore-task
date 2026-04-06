@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../constants/typography';
 import { Spacing } from '../constants/spacing';
 import { useTheme } from '../theme/ThemeContext';
+import { loginJobSeeker } from '../services/authService';
 
 const ActivityIndicator = require('react-native').ActivityIndicator;
 
@@ -35,16 +36,37 @@ export const LoginScreen: React.FC = () => {
       Alert.alert('Error', 'Please enter your phone number');
       return;
     }
+    if (phone.length < 11) {
+      Alert.alert('Error', 'Phone number must be 11 digits');
+      return;
+    }
     if (!password) {
       Alert.alert('Error', 'Please enter your password');
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await loginJobSeeker({
+        phone: phone.trim(),
+        password: password,
+      });
+
+      if (response.status === true) {
+        Alert.alert('Success', 'Login successful!', [
+          { text: 'OK', onPress: () => router.replace('/') }
+        ]);
+      } else {
+        const errorMsg = response.error 
+          ? Object.values(response.error).flat().join(', ')
+          : response.message || 'Login failed. Please try again.';
+        Alert.alert('Error', errorMsg);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Login functionality coming soon!');
-    }, 1000);
+    }
   };
 
   return (

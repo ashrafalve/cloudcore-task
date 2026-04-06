@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../constants/typography';
 import { Spacing } from '../constants/spacing';
 import { useTheme } from '../theme/ThemeContext';
+import { registerJobSeeker, verifyPhoneOtp } from '../services/authService';
 
 const ActivityIndicator = require('react-native').ActivityIndicator;
 
@@ -68,6 +69,11 @@ export const RegisterScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
+  const [showOtpView, setShowOtpView] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [registeredPhone, setRegisteredPhone] = useState('');
+  const [showOtpError, setShowOtpError] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -102,16 +108,147 @@ export const RegisterScreen: React.FC = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await registerJobSeeker({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        confirm_password: formData.confirm_password,
+        passport_number: formData.passport_number.trim().toUpperCase(),
+        dob: formData.dob,
+        gender: formData.gender,
+      });
+
+      if (response.status === true) {
+        const otpValue = (response as any).data?.data?.otp || response.otp;
+        if (otpValue) {
+          setRegisteredPhone(formData.phone.trim());
+          setShowOtpView(true);
+          Alert.alert('Registration Successful', `Your OTP: ${otpValue}`, [
+            { text: 'OK' }
+          ]);
+        } else {
+          Alert.alert('Success', response.message || 'Registration successful!', [
+            { text: 'OK', onPress: () => router.back() }
+          ]);
+        }
+      } else {
+        const errorMsg = response.error 
+          ? Object.values(response.error).flat().join(', ')
+          : response.message || 'Registration failed';
+        Alert.alert('Error', errorMsg);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Registration functionality coming soon!');
-    }, 1000);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp.trim()) {
+      Alert.alert('Error', 'Please enter the OTP');
+      return;
+    }
+    if (otp.length < 4) {
+      Alert.alert('Error', 'Please enter a valid OTP');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowOtpError(false);
+    try {
+      const response = await verifyPhoneOtp({
+        phone: registeredPhone,
+        otp: otp.trim(),
+      });
+
+      if (response.status === true) {
+        Alert.alert('Success', 'Phone verified successfully!', [
+          { text: 'OK', onPress: () => router.replace('/') }
+        ]);
+      } else {
+        setShowOtpError(true);
+        const errorMsg = response.error 
+          ? Object.values(response.error).flat().join(', ')
+          : response.message || 'Verification failed';
+        Alert.alert('Error', errorMsg);
+      }
+    } catch (error: any) {
+      setShowOtpError(true);
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
+
+  if (showOtpView) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle="dark-content" />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <View style={styles.headerSection}>
+              <Image 
+                source={require('../../assets/images/logo.png')} 
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Verify your phone</Text>
+            </View>
+
+            <View style={styles.otpSection}>
+              <View style={[styles.otpInputContainer, { backgroundColor: colors.surface, borderColor: showOtpError ? colors.error : colors.border }]}>
+                <Ionicons name="shield-checkmark-outline" size={24} color={colors.primary} style={styles.otpIcon} />
+                <TextInput
+                  style={[styles.otpInput, { color: colors.text }]}
+                  placeholder="Enter OTP"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="number-pad"
+                  value={otp}
+                  onChangeText={(text) => {
+                    setOtp(text.replace(/[^0-9]/g, ''));
+                    setShowOtpError(false);
+                  }}
+                  maxLength={6}
+                  autoFocus
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.loginButton, { backgroundColor: isLoading ? colors.textMuted : colors.primary }]} 
+                onPress={handleVerifyOtp}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.white} />
+                ) : (
+                  <Text style={[styles.loginButtonText, { color: colors.white }]}>Verify OTP</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.resendButton} 
+                onPress={() => {
+                  setShowOtpView(false);
+                  setOtp('');
+                  setShowOtpError(false);
+                }}
+              >
+                <Text style={[styles.resendText, { color: colors.primary }]}>Go Back to Registration</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -353,6 +490,34 @@ const styles = StyleSheet.create({
   signupText: {
     ...Typography.body,
     fontWeight: '700',
+  },
+  otpSection: {
+    marginTop: Spacing.lg,
+  },
+  otpInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    height: 60,
+    marginBottom: Spacing.lg,
+  },
+  otpIcon: {
+    marginRight: Spacing.sm,
+  },
+  otpInput: {
+    flex: 1,
+    ...Typography.h2,
+    textAlign: 'center',
+  },
+  resendButton: {
+    alignItems: 'center',
+    marginTop: Spacing.md,
+  },
+  resendText: {
+    ...Typography.body,
+    fontWeight: '600',
   },
 });
 
