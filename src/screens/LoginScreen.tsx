@@ -110,7 +110,7 @@ export const LoginScreen: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.loginButton, isLoading && { backgroundColor: colors.textMuted }]} 
+              style={[styles.loginButton, { backgroundColor: isLoading ? colors.textMuted : colors.primary }]} 
               onPress={handleLogin}
               disabled={isLoading}
             >
