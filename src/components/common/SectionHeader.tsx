@@ -16,8 +16,8 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onSeeAll })
       <Text style={styles.title}>{title}</Text>
       {onSeeAll && (
         <TouchableOpacity style={styles.seeAllButton} onPress={onSeeAll}>
-          <Text style={styles.seeAll}>See All</Text>
-          <Ionicons name="chevron-forward-outline" size={16} color={Colors.primary} />
+          <Text style={styles.seeAll}>View All</Text>
+          <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
         </TouchableOpacity>
       )}
     </View>
@@ -44,6 +44,5 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.primary,
     fontWeight: '600',
-    marginRight: Spacing.xs,
   },
 });

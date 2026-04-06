@@ -8,14 +8,15 @@ import {
   Platform,
   ScrollView,
   Alert,
+  TextInput,
+  StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ScreenContainer } from '../components/common/ScreenContainer';
-import { AppInput } from '../components/common/AppInput';
-import { AppButton } from '../components/common/AppButton';
 import { Colors } from '../constants/colors';
 import { Typography } from '../constants/typography';
 import { Spacing } from '../constants/spacing';
@@ -32,6 +33,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginScreen: React.FC = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
@@ -70,12 +72,9 @@ export const LoginScreen: React.FC = () => {
     }
   };
 
-  const navigateToRegister = () => {
-    router.push('/register' as never);
-  };
-
   return (
-    <ScreenContainer>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -85,104 +84,200 @@ export const LoginScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your job search</Text>
+          <View style={styles.headerSection}>
+            <View style={styles.logoCircle}>
+              <Ionicons name="briefcase" size={36} color={Colors.primary} />
+            </View>
+            <Text style={styles.title}>BHC Jobs</Text>
+            <Text style={styles.subtitle}>Welcome back!</Text>
           </View>
 
-          <View style={styles.form}>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <AppInput
-                  label="Phone Number"
-                  placeholder="Enter your phone number"
-                  keyboardType="phone-pad"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.phone?.message}
+          <View style={styles.formSection}>
+            <View style={styles.inputWrapper}>
+              <View style={styles.inputContainer}>
+                <Ionicons name="call-outline" size={20} color={Colors.textMuted} />
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Phone Number"
+                      placeholderTextColor={Colors.textMuted}
+                      keyboardType="phone-pad"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      maxLength={11}
+                    />
+                  )}
                 />
-              )}
-            />
+              </View>
+              {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+            </View>
 
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <AppInput
-                  label="Password"
-                  placeholder="Enter your password"
-                  secureTextEntry
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.password?.message}
+            <View style={styles.inputWrapper}>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color={Colors.textMuted} />
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Password"
+                      placeholderTextColor={Colors.textMuted}
+                      secureTextEntry={!showPassword}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                    />
+                  )}
                 />
-              )}
-            />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons 
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'} 
+                    size={20} 
+                    color={Colors.textMuted} 
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+            </View>
 
-            <AppButton
-              title="Sign In"
+            <TouchableOpacity style={styles.forgotButton}>
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
               onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
               disabled={isLoading}
-              style={styles.button}
-            />
+            >
+              {isLoading ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={styles.loginButtonText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don&apos;t have an account?</Text>
-            <TouchableOpacity onPress={navigateToRegister}>
-              <Text style={styles.linkText}> Sign Up</Text>
+          <View style={styles.footerSection}>
+            <Text style={styles.footerText}>Don't have an account?</Text>
+            <TouchableOpacity onPress={() => router.push('/register')}>
+              <Text style={styles.signupText}> Sign Up</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ScreenContainer>
+    </View>
   );
 };
 
+const ActivityIndicator = require('react-native').ActivityIndicator;
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingTop: Spacing.xxxl,
-    paddingBottom: Spacing.xxl,
+    paddingHorizontal: Spacing.lg,
   },
-  header: {
-    marginBottom: Spacing.xxxl,
+  headerSection: {
+    alignItems: 'center',
+    marginTop: Spacing.xxxl + Spacing.xl,
+    marginBottom: Spacing.xl,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: Colors.primaryLight + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
   },
   title: {
-    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: '800',
     color: Colors.text,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
   },
-  form: {
+  formSection: {
     marginBottom: Spacing.xl,
   },
-  button: {
-    marginTop: Spacing.md,
+  inputWrapper: {
+    marginBottom: Spacing.md,
   },
-  footer: {
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    height: 56,
+  },
+  input: {
+    flex: 1,
+    ...Typography.body,
+    color: Colors.text,
+    marginLeft: Spacing.sm,
+  },
+  errorText: {
+    ...Typography.caption,
+    color: Colors.error,
+    marginTop: Spacing.xs,
+    marginLeft: Spacing.xs,
+  },
+  forgotButton: {
+    alignSelf: 'flex-end',
+    marginBottom: Spacing.lg,
+  },
+  forgotText: {
+    ...Typography.bodySmall,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  loginButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginButtonDisabled: {
+    backgroundColor: Colors.textMuted,
+  },
+  loginButtonText: {
+    ...Typography.button,
+    color: Colors.white,
+  },
+  footerSection: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: Spacing.xl,
   },
   footerText: {
     ...Typography.body,
     color: Colors.textSecondary,
   },
-  linkText: {
+  signupText: {
     ...Typography.body,
     color: Colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
+
+export default LoginScreen;

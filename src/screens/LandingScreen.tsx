@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl, StatusBar, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../components/common/ScreenContainer';
-import { LoadingState, ErrorState, EmptyState } from '../components/common/LoadingState';
+import { LoadingState, ErrorState } from '../components/common/LoadingState';
 import { SectionHeader } from '../components/common/SectionHeader';
 import { HeroBanner } from '../components/landing/HeroBanner';
 import { IndustryCard } from '../components/landing/IndustryCard';
@@ -34,7 +34,7 @@ export const LandingScreen: React.FC = () => {
   };
 
   const handleJobPress = (job: Job) => {
-    router.push(`/job/${job.id}` as any);
+    console.log('View job:', job.job_title, 'ID:', job.id);
   };
 
   const handleCompanyPress = (company: Company) => {
@@ -43,12 +43,7 @@ export const LandingScreen: React.FC = () => {
 
   const renderIndustrySection = () => {
     if (industries.length === 0 && !isLoading) {
-      return (
-        <View style={styles.section}>
-          <SectionHeader title="Popular Industries" />
-          <EmptyState message="No industries available" />
-        </View>
-      );
+      return null;
     }
 
     return (
@@ -58,11 +53,13 @@ export const LandingScreen: React.FC = () => {
           horizontal
           data={industries}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <IndustryCard industry={item} onPress={() => handleIndustryPress(item)} />
+          renderItem={({ item, index }) => (
+            <View style={{ marginLeft: index === 0 ? Spacing.lg : 0, marginRight: Spacing.md }}>
+              <IndustryCard industry={item} onPress={() => handleIndustryPress(item)} />
+            </View>
           )}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
+          contentContainerStyle={styles.horizontalListEnd}
         />
       </View>
     );
@@ -70,32 +67,26 @@ export const LandingScreen: React.FC = () => {
 
   const renderJobsSection = () => {
     if (jobs.length === 0 && !isLoading) {
-      return (
-        <View style={styles.section}>
-          <SectionHeader title="Recommended Jobs" />
-          <EmptyState message="No jobs available" />
-        </View>
-      );
+      return null;
     }
 
     return (
       <View style={styles.section}>
         <SectionHeader title="Recommended Jobs" />
-        {jobs.slice(0, 5).map((job) => (
-          <JobCard key={String(job.id)} job={job} onPress={() => handleJobPress(job)} />
-        ))}
+        <View style={styles.jobsContainer}>
+          {jobs.slice(0, 5).map((job, index) => (
+            <View key={String(job.id)} style={index === 0 ? styles.jobCardFirst : undefined}>
+              <JobCard job={job} onPress={() => handleJobPress(job)} />
+            </View>
+          ))}
+        </View>
       </View>
     );
   };
 
   const renderCompaniesSection = () => {
     if (companies.length === 0 && !isLoading) {
-      return (
-        <View style={styles.section}>
-          <SectionHeader title="Popular Companies" />
-          <EmptyState message="No companies available" />
-        </View>
-      );
+      return null;
     }
 
     return (
@@ -105,11 +96,13 @@ export const LandingScreen: React.FC = () => {
           horizontal
           data={companies}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <CompanyCard company={item} onPress={() => handleCompanyPress(item)} />
+          renderItem={({ item, index }) => (
+            <View style={{ marginLeft: index === 0 ? Spacing.lg : 0, marginRight: Spacing.md }}>
+              <CompanyCard company={item} onPress={() => handleCompanyPress(item)} />
+            </View>
           )}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
+          contentContainerStyle={styles.horizontalListEnd}
         />
       </View>
     );
@@ -118,13 +111,15 @@ export const LandingScreen: React.FC = () => {
   if (isLoading && industries.length === 0 && jobs.length === 0 && companies.length === 0) {
     return (
       <ScreenContainer padded={false}>
-        <LoadingState fullScreen message="Loading..." />
+        <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+        <LoadingState fullScreen message="Loading jobs..." />
       </ScreenContainer>
     );
   }
 
   return (
     <ScreenContainer padded={false}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
       <FlatList
         data={[]}
         renderItem={null}
@@ -139,6 +134,9 @@ export const LandingScreen: React.FC = () => {
             {renderIndustrySection()}
             {renderJobsSection()}
             {renderCompaniesSection()}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>© 2026 BHC Jobs</Text>
+            </View>
           </>
         }
         refreshControl={
@@ -158,15 +156,29 @@ export const LandingScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: Spacing.xxxl,
+    paddingBottom: Spacing.xl,
   },
   section: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
   },
-  horizontalList: {
+  horizontalListEnd: {
+    paddingRight: Spacing.lg,
+  },
+  jobsContainer: {
     paddingHorizontal: Spacing.lg,
+  },
+  jobCardFirst: {
+    paddingHorizontal: 0,
   },
   errorContainer: {
     margin: Spacing.lg,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  footerText: {
+    fontSize: 12,
+    color: Colors.textMuted,
   },
 });
